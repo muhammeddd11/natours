@@ -21,14 +21,14 @@ const userRouter = require(`${__dirname}/routes/userRouter`);
 //1) middlewares
 
 //app.use(morgan('dev'));
-app.use((req,res,next)=>{
+/*app.use((req,res,next)=>{
     console.log("Hello from the middleware")
     next()
-})
-app.use((req,res,next)=>{
+})*/
+/*app.use((req,res,next)=>{
     req.requestTime = new Date().toISOString();
     next();
-})
+})*/
 //2) function handle request and response
 
 

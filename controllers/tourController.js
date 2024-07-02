@@ -2,7 +2,7 @@ const fs = require('fs');
 
 const express = require('express')
 
-const tourModel = require(`${__dirname}/../models/tourModel`)
+const Tour = require(`${__dirname}/../models/tourModel`)
 
 
 const app =express()
@@ -10,7 +10,7 @@ const app =express()
 //const tours = JSON.parse(fs.readFileSync(`${__dirname}/../dev-data/data/tours-simple.json`,'utf-8'));
 
 
-exports.checkBody = (req,res,next)=>{
+/*exports.checkBody = (req,res,next)=>{
     if(!req.body.name || !req.body.price){
 
         return res.status(404).json({
@@ -23,7 +23,7 @@ exports.checkBody = (req,res,next)=>{
     next();
 }
 
-/*exports.checkId =(req,res,next,val)=>{ 
+exports.checkId =(req,res,next,val)=>{ 
     if (req.params.id *1 > tours.length){
     return res.status(404).json({
     status:"Fail",
@@ -33,62 +33,95 @@ exports.checkBody = (req,res,next)=>{
     
     next();
 }*/
-exports.getAllTours = (req, res) => {
-    res.status(200).json({
-        status:"success",
-        requestTime:req.requestTime,
-        data:{
-            //tours
-        }
-    })
-}
-exports.getTour = (req, res) => {// :id? optional parameter
-    const id = req.params.id *1
-    //const reqtour = tours.find(el => el.id === id)
-    /*
-        if (id > tours.length){
-            return res.status(404).json({
-            status:"Failed",
-            message:"Tour not found "
-        })    
-        }
-    */
-            res.status(200).json({
+exports.getAllTours =async (req, res) => {
+    try{
+        const tours = await Tour.find()
+
+    
+        res.status(200).json({
             status:"success",
             data:{
-                //reqtour
+                tours
             }
         })
+    }catch(err){
+        res.status(400).json({
+            status:"Fail",
+            message: err.message
+        })
+    }   
 }
-exports.addTour =  (req, res)=>{
-    //const newId = tours[tours.length - 1].id + 1;
-    //const newTour = Object.assign({id : newId}, req.body);
-    tours.push(newTour);
-    fs.writeFile("./dev-data/data/tours-simple.json",JSON.stringify(tours),err=>{
-        if(err) res.status(500).send(err);
-        res.status(201).json({
-            status:200,
+exports.getTour = async (req, res) => {// :id? optional parameter
+    try{
+        const reqtour = await Tour.findById(req.params.id)
+        res.status(200).json({
+            status:"success",
             data:{
-                //tours: newTour
-            }
+                    reqtour
+                }
+            })
+    }catch(err){
+        res.status(400).json({
+            status:"Fail",
+            message:err.message
         })
-    })
+    }
 }
-exports.updateTour = (req,res)=>{
-
-    console.log(req.body)  
-    res.status(200).json({status:"success",
+exports.addTour = async (req, res)=>{
+    try{
+        const newTour = await Tour.create(req.body)
+        res.status(201).json({
+        status:"success",
         data:{
-            tour:"Updated tour here..."
+            tour:newTour
         }
-
-    })
+         })
+        console.log("New tour was added")
+    }catch(err){
+        console.log(err)
+        res.status(400).json({
+            status:"Fail",
+            message:err.message
+            
+        })
+    }
 }
-exports.deleteTour = (req,res)=>{
-   
-    res.status(204).json({
-        "sataus":"success",
-        "message":null
+exports.updateTour =async (req,res)=>{
+
+    try{
+
+        const tour = await Tour.findByIdAndUpdate(req.params.id,req.body,{
+            new:true,
+            runValidators:true
         })
 
+
+        res.status(200).json({status:"success",
+            data:{
+                tour
+            }
+    
+        })
+
+    }catch(err){
+        res.status(400).json({
+            status:"fail",
+            message:err.message
+        })
+    }
+}
+exports.deleteTour = async (req,res)=>{
+    try{
+        await Tour.findByIdAndDelete(req.params.id)
+        res.status(200).json({
+            "sataus":"success"
+        })
+
+    }catch(err){
+        res.status(404).json({
+            status:"fail",
+            message:err
+        })
+    }
+    
 }
