@@ -35,9 +35,13 @@ exports.checkId =(req,res,next,val)=>{
 }*/
 exports.getAllTours =async (req, res) => {
     try{
-        const tours = await Tour.find()
+        const queryOBJ = {...req.query}
+        const execludeFields = ['page','limit','sort','fields']
+        execludeFields.forEach(el => delete queryOBJ[el]) 
+        const query = Tour.find(queryOBJ)
 
-    
+    //const tours = await Tour.find().where('duration').equals(5).where('difficulty').equals('easy')
+        const tours = await query
         res.status(200).json({
             status:"success",
             data:{
