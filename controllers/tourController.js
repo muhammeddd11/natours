@@ -1,6 +1,7 @@
 const fs = require('fs');
 
-const express = require('express')
+const express = require('express');
+const { stringify } = require('querystring');
 
 const Tour = require(`${__dirname}/../models/tourModel`)
 
@@ -35,15 +36,21 @@ exports.checkId =(req,res,next,val)=>{
 }*/
 exports.getAllTours =async (req, res) => {
     try{
+        // filtering 
         const queryOBJ = {...req.query}
         const execludeFields = ['page','limit','sort','fields']
-        execludeFields.forEach(el => delete queryOBJ[el]) 
-        const query = Tour.find(queryOBJ)
+        execludeFields.forEach(el => delete queryOBJ[el])
+        
+        // advanced filtering 
+        let queryStr = JSON.stringify(queryOBJ)
+        queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g,match => `$${match}`)
+        const query = Tour.find(JSON.parse(queryStr))
 
     //const tours = await Tour.find().where('duration').equals(5).where('difficulty').equals('easy')
         const tours = await query
         res.status(200).json({
             status:"success",
+            length:tours.length,
             data:{
                 tours
             }
