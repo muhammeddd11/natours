@@ -1,5 +1,6 @@
 const Tour = require(`${__dirname}/../models/tourModel`);
-const APIFeatures = require(`${__dirname}/../Utilites/apiFeatures`)
+const APIFeatures = require(`${__dirname}/../Utilites/apiFeatures`);
+
 exports.aliasTopTours = (req, res, next) => {
     req.query.limit = '5';
     req.query.sort = '-ratingsAverage,price';
@@ -72,45 +73,46 @@ exports.deleteTour = async (req, res) => {
         res.status(404).json({ status: 'fail', message: err.message });
     }
 };
+
 exports.getTourStats = async (req,res)=>{
     try{
         const stats = await Tour.aggregate([
-                {
-                    $match: { ratingAverage: { $gte: 4.5 } }
-                },
-                {
-                    $group: {
-                        _id: {$toUpper:'$difficulty'},
-                        numRating:{$sum:'$ratingQuantity'},
-                        numTours:{$sum:1},
-                        avgRating: { $avg: '$ratingsAverage' },
-                        avgPrice: { $avg: '$price' },
-                        minPrice: { $min: '$price' },
-                        maxPrice: { $max: '$price' }
-                    }
-                } ,
-                {
-                    $sort:{
-                         avgPrice:1
-                    }
-                },  // we can repeat stages
-                {
-                    $match:{
-                        _id:{$ne:'EASY'}
-                    }
+            {
+                $match: { ratingAverage: { $gte: 4.5 } }
+            },
+            {
+                $group: {
+                    _id: {$toUpper:'$difficulty'},
+                    numRating:{$sum:'$ratingQuantity'},
+                    numTours:{$sum:1},
+                    avgRating: { $avg: '$ratingsAverage' },
+                    avgPrice: { $avg: '$price' },
+                    minPrice: { $min: '$price' },
+                    maxPrice: { $max: '$price' }
                 }
-            ]);
+            } ,
+            {
+                $sort:{
+                    avgPrice:1
+                }
+            },  // we can repeat stages
+            {
+                $match:{
+                    _id:{$ne:'EASY'}
+                }
+            }
+        ]);
         res.status(200).json({
-             status: 'success',
-              data: {
-                 stats 
-                } 
-            });
+            status: 'success',
+            data: {
+                stats 
+            } 
+        });
 
-    }catch(err){
+    } catch(err) {
         res.status(400).json({
-            status:"Fail",
-            message:err.message
-        })
+            status: "Fail",
+            message: err.message
+        });
     }
-}
+};
