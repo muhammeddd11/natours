@@ -11,10 +11,12 @@ const router = express.Router();
 
 //router.param('id',tourController.checkId)
 
+
+router.route('/monthly-plan').get(tourController.getMonthlyPlan)
+
 router
   .route('/topFiveCheap')
   .get(tourController.aliasTopTours, tourController.getAllTours);
-
 router.route('/tourStats').get(tourController.getTourStats)
 router.route('/').get(tourController.getAllTours).post(tourController.addTour);
 router.route('/:id').get(tourController.getTour).patch(tourController.updateTour).delete(tourController.deleteTour);
