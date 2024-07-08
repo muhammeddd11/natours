@@ -2,16 +2,24 @@ const mongoose = require('mongoose')
 //define a mongoose schema 
 const slugify = require('slugify')
 
+const validator = require('validator')
+
 const tourSchema = new mongoose.Schema({
     name:{
         type:String,
         required:[true, 'Name is required'],
         unique: true,
-        trim:true
+        trim:true,
+        maxlength:[40 ,'name must have less than or equal 40 characters'],
+        minlength:[10,'name must have more than or equal 10 characters'],
+        validate:[validator.isAlpha,'Tour name should only contains characters']
     },
     ratingAverage:{
         type:Number,
-        default:4.5
+        default:4.5,
+        // validator is a function return either true or false
+        min:[1,'rating should be more than or equal 1'],
+        max:[5,'rating should be less than or equal 5']
     },
     price: {
         type:Number,
@@ -29,13 +37,26 @@ const tourSchema = new mongoose.Schema({
     },
     difficulty:{
         type: String,
-        required:[true,'Tour must have a difficulty']
+        required:[true,'Tour must have a difficulty'],
+        enum:{
+            values:['easy','medium','difficult'],
+            message:"difficulty either easy , medium or difficult"
+
+        }
     },
     ratingQuantity:{
         type: Number,
         default:0
     },
-    discount:Number,
+    discount:{
+        type:Number,
+        validate:{
+            // can make a validator with this keywords only when create new tour
+            validator:function(val){
+            return val < this.price
+        },
+        message:"discount value should be less than ({VALUE})"
+    }},
     summary:{
         type:String,
         trim:true,
@@ -52,13 +73,13 @@ const tourSchema = new mongoose.Schema({
     images:[String],
     createdAt:{
         type:Date,
-        defult:Date.now(),
+        default:Date.now(),
         select : false
     },
     startDates:[Date],
     secretTour:{
         type:Boolean,
-        defualt:false
+        default:false
     }
 },
 {
@@ -95,6 +116,7 @@ tourSchema.pre('save',function(next){
 
 // we can have multiple pre nd post middleware (hook)
 // post middleware has access to next and document
+// save and create and not update
 // middleware execute after and before a certain event
 
 tourSchema.post('save',function(doc){
@@ -120,7 +142,7 @@ tourSchema.post(/^find/,function(docs){
 
 tourSchema.pre('aggregate',function(next){
     this.pipeline().unshift({$match:{secretTour:{$ne:true}}})
-    console.log(this.pipeline())
+    //console.log(this.pipeline())
     next()
 })
 
