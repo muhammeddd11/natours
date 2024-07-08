@@ -146,10 +146,10 @@ exports.getMonthlyPlan = async (req, res) => {
             status: 'success',
             data: { plan }
         });
-    } catch (err) {
+    }catch(err){
         res.status(400).json({
-            status: 'fail',
-            message: err.message }
-        });
+            status:"Fail",
+            message:err.mesage
+        })
     }
 };
