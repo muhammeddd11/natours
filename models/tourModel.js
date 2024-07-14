@@ -11,8 +11,8 @@ const tourSchema = new mongoose.Schema({
         unique: true,
         trim:true,
         maxlength:[40 ,'name must have less than or equal 40 characters'],
-        minlength:[10,'name must have more than or equal 10 characters'],
-        validate:[validator.isAlpha,'Tour name should only contains characters']
+        minlength:[10,'name must have more than or equal 10 characters']
+        //validate:[validator.isAlpha,'Tour name should only contains characters']
     },
     ratingAverage:{
         type:Number,
