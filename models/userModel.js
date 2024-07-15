@@ -8,7 +8,7 @@ const bcrypt = require('bcrypt');
 const userSchema = new mongoose.Schema({
     name:{
         type:String,
-        require:[true,"Users must have names"],
+        required:[true,"Users must have names"],
         maxlength:25,
         trim:true
     },
@@ -16,13 +16,13 @@ const userSchema = new mongoose.Schema({
         type:String,
         unique:true,
         maxlength:25,
-        require:[true,"users must have usernames"],
+        required:[true,"users must have usernames"],
         trim:true
     },
     email:{
         type:String,
         unique:true,
-        require:[true,"users must have emails"],
+        required:[true,"users must have emails"],
         trim:true,
         lowercase:true,
         validate:[validator.isEmail,"Provide a valid email"]
@@ -32,7 +32,8 @@ const userSchema = new mongoose.Schema({
     password:{
         type:String,
         require:[true,"password is required"],
-        minlength:8
+        minlength:8,
+        select:false
     },
     passwordConfirmation:{
         type:String,
@@ -55,5 +56,8 @@ userSchema.pre('save',async function(next){
     next()
 })
 
+userSchema.methods.correctPassowrd= async function(candidatePassword,userPassword){
+    return await bcrypt.compare(candidatePassword,userPassword)
+}
 const User = mongoose.model('User',userSchema)
 module.exports=User
