@@ -1,18 +1,24 @@
 const express = require('express');
-
 const app = express();
-
-app.use(express.json())
-
+const tourRouter = require(`${__dirname}/routes/tourRouters`);
+const userRouter = require(`${__dirname}/routes/userRouter`);
 const AppError = require(`${__dirname}/Utilites/appError`)
 const GlobalerrorHandler = require(`${__dirname}/controllers/errorController`)
 
 
-const tourRouter = require(`${__dirname}/routes/tourRouters`);
-const userRouter = require(`${__dirname}/routes/userRouter`);
 
 
+// middlewares
 app.use(express.static(`${__dirname}/public`))
+
+app.use(express.json())
+
+app.use((req, res, next) => {
+    req.requestTime= new Date().toISOString();
+    next();
+  });
+
+// routes
 
 app.use('/api/v1/tours',tourRouter)
 app.use('/api/v1/users',userRouter)

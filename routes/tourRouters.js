@@ -4,6 +4,8 @@ const app = express();
 
 app.use(express.json());
 
+const authController = require(`${__dirname}/../controllers/authController`)
+
 const tourController = require(`${__dirname}/../controllers/tourController`)
 
 const router = express.Router();
@@ -18,7 +20,7 @@ router
   .route('/topFiveCheap')
   .get(tourController.aliasTopTours, tourController.getAllTours);
 router.route('/tourStats').get(tourController.getTourStats)
-router.route('/').get(tourController.getAllTours).post(tourController.addTour);
+router.route('/').get(authController.protect,tourController.getAllTours).post(tourController.addTour);
 router.route('/:id').get(tourController.getTour).patch(tourController.updateTour).delete(tourController.deleteTour);
 
   module.exports = router

@@ -3,6 +3,9 @@ const handleCast = err =>{
         const message = `Invalid ${err.path} : ${err.value}`
         return new AppError(message,404)
 }
+const handleToken = err => {return new AppError("invalid token please login again",401)}
+
+const handleExpiration = err => {return new AppError("Please login again",401)}
 
 const handleDuplicate = err =>{
     const message = "Duplicate field value : x. please use another value" 
@@ -52,6 +55,8 @@ module.exports=(err,req,res,next)=>{
         if(err.name === "CastError") error = handleCast(err)
         if(err.code === 11000) error = handleDuplicate(err)
         if(err.name === "ValidationError") error = handleValidation(err)
+        if(err.name === "JsonWebTokenError") error = handleToken(err)
+        if(err.name === "TokenExpiredError") error = handleExpiration(err)
         errorProd(error,res)
     }
 

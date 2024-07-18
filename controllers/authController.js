@@ -1,8 +1,10 @@
+const {promisify} = require('util')
 const User = require(`${__dirname}/../models/userModel`)
 const catchAsync  = require(`${__dirname}/../Utilites/catchAsync`)
 const jwt = require('jsonwebtoken')
 const { token } = require('morgan')
 const AppError = require(`${__dirname}/../Utilites/appError`)
+
 9
 const createToken = id=>{
     return jwt.sign({id:id},process.env.JWT_secret,{
@@ -41,4 +43,24 @@ exports.login = catchAsync(async(req,res,next)=>{
         status:"success",
         token
     })
+})
+exports.protect =catchAsync(async (req,res,next)=>{
+    // 1) getting token and check if it's there
+    let token
+    if(req.headers.authorization && req.headers.authorization.startsWith('Bearer')){
+        token = req.headers.authorization.split(" ")[1]
+    }
+    if(!token) return next(new AppError("You should logging in before you can see the tours",401))
+    
+    // 2) verification the token
+    const decoded = await promisify(jwt.verify)(token,process.env.JWT_secret)
+    // 3) check if the user still exists
+    const freshUser = await User.findById(decoded.id).select('+passwordChangedAt')
+    if(!freshUser) return next(new AppError("the user belonging to this token is no longer exists..",401))
+    //4) if the user change password after token was issued
+    
+    //if(freshUser.checkingPassword(decoded.iat)) return next(new AppError("Please login again",401))
+    // grant access to protected route    
+    req.user = freshUser
+    next();
 })
