@@ -1,3 +1,4 @@
+const crypto = require('crypto')
 const mongoose = require('mongoose')
 const { isLowercase } = require('validator')
 const validator = require('validator')
@@ -35,6 +36,11 @@ const userSchema = new mongoose.Schema({
         minlength:8,
         select:false
     },
+    role:{
+      type:String,
+      enum:['admin','user','guid','lead-guide'],
+      default:'user'  
+    },
     passwordConfirmation:{
         type:String,
         require:[true,"Please confirm your password"],
@@ -45,7 +51,9 @@ const userSchema = new mongoose.Schema({
         },
         message:"Passwords are not match"
     },
-    passwordChangedAt:Date
+    passwordChangedAt:Date,
+    resetToken:String,
+    resetTokenExpire:String
 
 })
 
@@ -55,6 +63,11 @@ userSchema.pre('save',async function(next){
     this.password = await bcrypt.hash(this.password,12)   
     this.passwordConfirmation = undefined // to do not save a field in the database assign it to undefined
     next()
+})
+userSchema.pre('save',async function(next){
+
+    if(!this.isModified('changePasswordAt') || this.isNew) return next()
+    this.changePasswordAt = Date.now() - 1000
 })
 
 userSchema.methods.correctPassowrd= async function(candidatePassword,userPassword){
@@ -69,6 +82,15 @@ userSchema.methods.checkingPassword= async function(JWTTimestamp){
 
     //means not chandes
     return false
+}
+userSchema.methods.createPasswordResetToken = function(){
+    const token = crypto.randomBytes(32).toString('hex')
+    this.resetToken = crypto.createHash('sha256').update(token).digest('hex')
+    console.log({token},this.resetToken)
+    this.resetTokenExpire = Date.now() + 10 * 60 * 1000
+    
+    return token
+
 }
 const User = mongoose.model('User',userSchema)
 module.exports=User
