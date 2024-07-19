@@ -12,13 +12,6 @@ exports.getAllUsers = catchAsync(async (req,res,next) => {
     });
   
 })
-const filterOBJ = (obj, ...allowedFields)=>{
-    Object.keys(obj).forEach(el =>{
-        const newObject = {}
-        if(allowedFields.includes(el)) newObject[el] = obj[el]
-    })
-}
-
 exports.createUser = (req,res) => {
     res.status(500).json({
         status:"error",
@@ -56,8 +49,6 @@ exports.updateMe  = catchAsync(async (req,res,next)=>{
     }
 
     //2) update the user body
-
-    const filterBody = filterOBJ(req.body , 'email','name')
     
     const updateduser = await User.findByIdAndUpdate(req.user.id,{email:req.body.email,name:req.body.name},
         {
@@ -72,4 +63,11 @@ exports.updateMe  = catchAsync(async (req,res,next)=>{
         }
     })
 
+})
+
+exports.deleteMe = catchAsync(async(req,res,next)=>{
+    await User.findByIdAndUpdate(req.user.id,{active:false})
+    res.status(204).json({
+        status:"succes"
+    })
 })

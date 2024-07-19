@@ -32,7 +32,7 @@ const userSchema = new mongoose.Schema({
     photo:String,
     password:{
         type:String,
-        require:[true,"password is required"],
+        required:[true,"password is required"],
         minlength:8,
         select:false
     },
@@ -53,7 +53,12 @@ const userSchema = new mongoose.Schema({
     },
     passwordChangedAt:Date,
     resetToken:String,
-    resetTokenExpire:String
+    resetTokenExpire:String,
+    active:{
+        type:Boolean,
+        default:true,
+        select:false
+    }
 
 })
 
@@ -62,6 +67,11 @@ userSchema.pre('save',async function(next){
     if(!this.isModified('password')) return next()
     this.password = await bcrypt.hash(this.password,12)   
     this.passwordConfirmation = undefined // to do not save a field in the database assign it to undefined
+    next()
+})
+userSchema.pre(/^find/,async function(next){//findandsomthing and update
+    // points to current query
+    this.find({active:{$ne:false}})
     next()
 })
 userSchema.pre('save',async function(next){

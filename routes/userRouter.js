@@ -9,6 +9,7 @@ const userController = require(`${__dirname}/../controllers/userController`)
 const router = express.Router();
 
 router.route('/updateMyPassword').patch(authController.protect,authController.updatePassword)
+router.route('/deleteMe').delete(authController.protect,userController.deleteMe)
 router.route('/updateMe').patch(authController.protect,userController.updateMe)
 router.route('/resetPassword:token').patch(authController.forgetPassword)
 router.route('/signup').post(authController.signUp)
