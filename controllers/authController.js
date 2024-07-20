@@ -14,9 +14,19 @@ const createToken = id=>{
 
 const createAndSendToken = (user,status,res)=>{
     const token = createToken(user._id)
+    const cookieOPtions={
+        expires:new Date(Date.now()+process.env.COOKIE_EXPIRES*24*60*60*1000),
+        httpOnly:true
+    }
+
+
+    if(process.env.NODE_ENV === 'production') cookieOPtions.secure=true
+
+    res.cookie('JWT',token,cookieOPtions)
+
+    user.password = undefined
     res.status(status).json({
         status:"success",
-        token,
         data:{
             user
         }
