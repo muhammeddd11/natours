@@ -20,7 +20,7 @@ router
   .route('/topFiveCheap')
   .get(tourController.aliasTopTours, tourController.getAllTours);
 router.route('/tourStats').get(tourController.getTourStats)
-router.route('/').get(authController.protect,tourController.getAllTours).post(tourController.addTour);
+router.route('/').get(tourController.getAllTours).post(tourController.addTour);
 router.route('/:id').get(tourController.getTour).patch(tourController.updateTour).delete(authController.protect,authController.restrictedTo('admin',"leg-guide"),tourController.deleteTour);
 
   module.exports = router
