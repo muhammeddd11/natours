@@ -23,6 +23,7 @@ const limiter = rateLimit({
   windowMs: 60*60*1000,
   message:"To many requests from this ip please try again in an hour"
 })
+//comment here
 
 app.use('/api',limiter)//will affect all routes under /api routes limiter is a middleware so we can use app.use
 // serving static files
