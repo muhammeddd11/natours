@@ -4,15 +4,50 @@ const tourRouter = require(`${__dirname}/routes/tourRouters`);
 const userRouter = require(`${__dirname}/routes/userRouter`);
 const AppError = require(`${__dirname}/Utilites/appError`)
 const GlobalerrorHandler = require(`${__dirname}/controllers/errorController`)
-
+const rateLimit = require('express-rate-limit')
+const helmet = require('helmet')
+const mongoSanitize = require('express-mongo-sanitize')
+const xss = require('xss-clean')
+const hpp = require('hpp')
 
 
 
 // middlewares
+// security http headers 
+app.use(helmet())
+
+
+// limit requests from the client
+const limiter = rateLimit({
+  max:100,
+  windowMs: 60*60*1000,
+  message:"To many requests from this ip please try again in an hour"
+})
+//comment here
+
+app.use('/api',limiter)//will affect all routes under /api routes limiter is a middleware so we can use app.use
+// serving static files
 app.use(express.static(`${__dirname}/public`))
+//body parser 
+app.use(express.json({limit:'10KB'}))
 
-app.use(express.json())
+// data sanitization against NoSQL injection
+app.use(mongoSanitize());
 
+// data sanitization against XSS
+app.use(xss())
+
+// prevent parameter pollution
+
+app.use(hpp({
+  whitelist:[
+    'duration',
+    'ratingQuantity',
+    'ratingAverage',
+    'maxGroupSize',
+    'difficulty'
+  ]
+}))
 app.use((req, res, next) => {
     req.requestTime= new Date().toISOString();
     next();
