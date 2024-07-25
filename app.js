@@ -1,5 +1,4 @@
 const express = require('express');
-const app = express();
 const tourRouter = require(`${__dirname}/routes/tourRouters`);
 const userRouter = require(`${__dirname}/routes/userRouter`);
 const AppError = require(`${__dirname}/Utilites/appError`)
@@ -9,9 +8,7 @@ const helmet = require('helmet')
 const mongoSanitize = require('express-mongo-sanitize')
 const xss = require('xss-clean')
 const hpp = require('hpp')
-
-
-
+const app = express();
 // middlewares
 // security http headers 
 app.use(helmet())

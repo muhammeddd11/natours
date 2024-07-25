@@ -6,7 +6,7 @@ const dotenv = require('dotenv')
 dotenv.config({path : './config.env'})
 
 process.on("uncaughtException",err=>{
-    console.log(err)
+    console.log(err.name,err.message)
     console.log("Uncaught Exception ")
     process.exit(1)
     
@@ -33,9 +33,6 @@ const server = app.listen(port,()=>{
     console.log(`App is running on port ${port}`);
 });
 
-console.log(app.get('env'))
-
-console.log(process.env)
 
 process.on("unhandledRejection",err=>{
     console.log(err.name,err.message)
@@ -46,5 +43,5 @@ process.on("unhandledRejection",err=>{
     
 })
 
-//NODE_ENV=development nodemon server.js
+
 
