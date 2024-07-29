@@ -9,7 +9,7 @@ const tourSchema = new mongoose.Schema({
         type:String,
         required:[true, 'Name is required'],
         unique: true,
-        trim:true,
+        trim:true,//           muhammed                save it as muhammed
         maxlength:[40 ,'name must have less than or equal 40 characters'],
         minlength:[10,'name must have more than or equal 10 characters']
         //validate:[validator.isAlpha,'Tour name should only contains characters']
@@ -29,7 +29,7 @@ const tourSchema = new mongoose.Schema({
         type: Number,
         required:[true,'Duration must be set']
     },
-    slug:String
+    slug:String//do not understand the purpose of it
     ,
     maxGroupSize:{
         type: Number,
@@ -73,9 +73,9 @@ const tourSchema = new mongoose.Schema({
     images:[String],
     createdAt:{
         type:Date,
-        default:Date.now(),
-        select : false
-    },
+        default:Date.now,
+        select : false// not retreived when quering the data base
+    }, 
     startDates:[Date],
     secretTour:{
         type:Boolean,
@@ -105,16 +105,27 @@ const tourSchema = new mongoose.Schema({
             day:Number
         }
     ],
-    guides:Array
+    guides:[{
+        type:mongoose.Schema.ObjectId,
+        ref:'User'
+    }
+    ]
 },
 {
     toJSON:{virtuals:true},
-    toObject:{virtuals:true}
+    toObject:{virtuals:true}// do not understand their purpose
 })
 tourSchema.virtual('durationWeeks').get(function(){
     return this.duration/7
 })
 
+// virtual populate
+
+tourSchema.virtual('reviews',{
+    ref:"Review",
+    foreignField:'tour',
+    localField:'_id'
+})
 
 
 // create document (documents)
@@ -134,7 +145,6 @@ testTour.save().then(doc=>{
 
 //Document middleware: runs before save and create but no insertmany
 tourSchema.pre('save',function(next){
-    console.log(this)
     this.slug = slugify(this.name,{lower:true})
     next()
 })
@@ -154,12 +164,20 @@ tourSchema.post('save',function(doc){
 // query middleware
 
 tourSchema.pre(/^find/,function(next){
-    this.find({secretTour:{$ne:true}})
+    this.populate({
+        path:'guides',
+        select:'-__v'
+      })
+    next()
+})
+
+tourSchema.pre(/^find/,function(next){
+    this.find({secretTour:{$ne:true}})// to hidde all the secret tours
     this.start = Date.now();
     next();
 })
 tourSchema.post(/^find/,function(docs){
-    console.log(`Query took ${Date.now() - this.start} milliseconds!` )
+    console.log(`Query took ${Date.now() - this.start} milliseconds!` )//calculate the time taken by the query
 })
 
 
@@ -168,7 +186,7 @@ tourSchema.post(/^find/,function(docs){
 tourSchema.pre('aggregate',function(next){
     this.pipeline().unshift({$match:{secretTour:{$ne:true}}})
     //console.log(this.pipeline())
-    next()
+    next()// do not understand its purpose
 })
 
 // create model(models)

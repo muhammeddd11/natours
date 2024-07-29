@@ -1,6 +1,7 @@
 const express = require('express');
 const tourRouter = require(`${__dirname}/routes/tourRouters`);
 const userRouter = require(`${__dirname}/routes/userRouter`);
+const reviewRouter = require(`${__dirname}/routes/reviewRouter`)
 const AppError = require(`${__dirname}/Utilites/appError`)
 const GlobalerrorHandler = require(`${__dirname}/controllers/errorController`)
 const rateLimit = require('express-rate-limit')
@@ -45,6 +46,7 @@ app.use(hpp({
     'difficulty'
   ]
 }))
+// test middleware
 app.use((req, res, next) => {
     req.requestTime= new Date().toISOString();
     next();
@@ -54,6 +56,7 @@ app.use((req, res, next) => {
 
 app.use('/api/v1/tours',tourRouter)
 app.use('/api/v1/users',userRouter)
+app.use('/api/v1/reviews',reviewRouter)
 
 // handle all undefined routes if we able to reach this point here so request's route not matched others routes
 app.all('*',(req,res,next)=>{
@@ -63,6 +66,6 @@ app.all('*',(req,res,next)=>{
 
 // central error handling middleware
 
-app.use(GlobalerrorHandler)
+app.use(GlobalerrorHandler)//** mes **
 
 module.exports = app

@@ -7,11 +7,12 @@ const userController = require(`${__dirname}/../controllers/userController`)
 
 
 const router = express.Router();
+// having problem in assign the token in some features check it later
 
 router.route('/updateMyPassword').patch(authController.protect,authController.updatePassword)
 router.route('/deleteMe').delete(authController.protect,userController.deleteMe)
 router.route('/updateMe').patch(authController.protect,userController.updateMe)
-router.route('/resetPassword:token').patch(authController.forgetPassword)
+router.route('/resetPassword:token').patch(authController.forgetPassword)//not working
 router.route('/signup').post(authController.signUp)
 router.route('/login').post(authController.login)
 
