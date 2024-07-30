@@ -1,42 +1,21 @@
 const { x64 } = require("crypto-js");
-
 const User = require(`${__dirname}/../models/userModel`)
 const catchAsync = require(`${__dirname}/../Utilites/catchAsync`);
 const AppError = require(`${__dirname}/../Utilites/appError`)
-exports.getAllUsers = catchAsync(async (req,res,next) => {
-    const users = await User.find();
-    res.status(200).json({
-        status: 'success',
-        results: users.length,
-        data: { users }
-    });
-  
-})
+const factory = require('./Factory')
+
+//CRUD functions
+exports.editUser = factory.updateOne(User);
+exports.deleteUser = factory.deleteOne(User);
+exports.getAllUsers = factory.getAll(User);
+exports.getUser = factory.getOne(User);
+
+// Program related function
+
 exports.createUser = (req,res) => {
     res.status(500).json({
         status:"error",
-        message:"This route is not yet implemented"
-    })
-}
-
-exports.getUser = (req,res) => {
-    res.status(500).json({
-        status:"error",
-        message:"This route is not yet implemented"
-    })
-}
-
-exports.editUser = (req,res) => {
-    res.status(500).json({
-        status:"error",
-        message:"This route is not yet implemented"
-    })
-}
-
-exports.deleteUser = (req,res) => {
-    res.status(500).json({
-        status:"error",
-        message:"This route is not yet implemented"
+        message:"This route is not defined so please use signup instead"
     })
 }
 
