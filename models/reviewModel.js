@@ -15,7 +15,7 @@ const reviewSchema = new mongoose.Schema({
         default: Date.now,
         select: false
     },
-    author: {
+    user: {
         type: mongoose.Schema.ObjectId,
         ref: 'User',
         required: [true, "Review must belong to a user"]
@@ -30,8 +30,8 @@ const reviewSchema = new mongoose.Schema({
     toObject: { virtuals: true }
 });
 
-reviewSchema.pre(/^find/,function(next){
-    this.populate({path:"author",select:"name usename"}).populate({path:'tour',select:"name"})
+reviewSchema.pre(/^find/, function (next) {
+    this.populate({ path: "user", select: "name usename" }).populate({ path: 'tour', select: "name" })
     next()
 })
 
