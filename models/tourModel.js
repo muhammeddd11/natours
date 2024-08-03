@@ -136,6 +136,7 @@ tourSchema.virtual('reviews', {
 
 tourSchema.index({ price: 1, ratingAverage: -1 })// if we make compound index we do not need to make individual index for the spicified fields
 tourSchema.index({ slug: 1 })
+tourSchema.index({ startLocation: '2d' })
 
 // create document (documents)
 
@@ -188,13 +189,7 @@ tourSchema.post(/^find/, function (docs) {
 
 //aggregation middleware 
 
-tourSchema.pre('aggregate', function (next) {
-    this.pipeline().unshift({ $match: { secretTour: { $ne: true } } })
-    //console.log(this.pipeline())
-    next()// do not understand its purpose
-})
 
-// create model(models)
 
 
 const Tour = mongoose.model('Tour', tourSchema)

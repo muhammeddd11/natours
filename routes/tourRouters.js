@@ -24,6 +24,9 @@ router
 router.route('/tourStats')
   .get(tourController.getTourStats);
 
+router.route('/tourWithIn/:distance/center/:latlng/unit/:unit').get(tourController.getTourWithIn)
+router.route('/distances/:latlng/unit/:unit').get(tourController.getDistances)
+
 router.route('/')
   .get(tourController.getAllTours)
   .post(authController.protect, authController.restrictedTo('admin'), tourController.addTour);
