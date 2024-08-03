@@ -5,128 +5,137 @@ const slugify = require('slugify')
 const validator = require('validator')
 
 const tourSchema = new mongoose.Schema({
-    name:{
-        type:String,
-        required:[true, 'Name is required'],
-        unique: true,
-        trim:true,//           muhammed                save it as muhammed
-        maxlength:[40 ,'name must have less than or equal 40 characters'],
-        minlength:[10,'name must have more than or equal 10 characters']
+    name: {
+        type: String,
+        required: [true, 'Name is required'],
+        unique: true,// mongo behind the scene create an index for name becuase it is unique
+        trim: true,//           muhammed                save it as muhammed
+        maxlength: [40, 'name must have less than or equal 40 characters'],
+        minlength: [10, 'name must have more than or equal 10 characters']
         //validate:[validator.isAlpha,'Tour name should only contains characters']
     },
-    ratingAverage:{
-        type:Number,
-        default:4.5,
+    ratingAverage: {
+        type: Number,
+        default: 4.5,
         // validator is a function return either true or false
-        min:[1,'rating should be more than or equal 1'],
-        max:[5,'rating should be less than or equal 5']
+        min: [1, 'rating should be more than or equal 1'],
+        max: [5, 'rating should be less than or equal 5'],
+        set: val => Math.round(val * 10) / 10
     },
     price: {
-        type:Number,
-        required:[true,'Price is required']
-        },
-    duration:{
         type: Number,
-        required:[true,'Duration must be set']
+        required: [true, 'Price is required']
     },
-    slug:String//do not understand the purpose of it
+    duration: {
+        type: Number,
+        required: [true, 'Duration must be set']
+    },
+    slug: String//do not understand the purpose of it
     ,
-    maxGroupSize:{
+    maxGroupSize: {
         type: Number,
-        required:[true,'Tour must have a group size']
+        required: [true, 'Tour must have a group size']
     },
-    difficulty:{
+    difficulty: {
         type: String,
-        required:[true,'Tour must have a difficulty'],
-        enum:{
-            values:['easy','medium','difficult'],
-            message:"difficulty either easy , medium or difficult"
+        required: [true, 'Tour must have a difficulty'],
+        enum: {
+            values: ['easy', 'medium', 'difficult'],
+            message: "difficulty either easy , medium or difficult"
 
         }
     },
-    ratingQuantity:{
+    ratingQuantity: {
         type: Number,
-        default:0
+        default: 0
     },
-    discount:{
-        type:Number,
-        validate:{
+    discount: {
+        type: Number,
+        validate: {
             // can make a validator with this keywords only when create new tour
-            validator:function(val){
-            return val < this.price
-        },
-        message:"discount value should be less than ({VALUE})"
-    }},
-    summary:{
-        type:String,
-        trim:true,
-        required:[true,'tour must have a summary']
+            validator: function (val) {
+                return val < this.price
+            },
+            message: "discount value should be less than ({VALUE})"
+        }
     },
-    description:{
-        type:String,
-        trim:true
+    summary: {
+        type: String,
+        trim: true,
+        required: [true, 'tour must have a summary']
     },
-    imageCover:{
-        type:String,
-        required:[true,'Tour must have a cover image']
+    description: {
+        type: String,
+        trim: true
     },
-    images:[String],
-    createdAt:{
-        type:Date,
-        default:Date.now,
-        select : false// not retreived when quering the data base
-    }, 
-    startDates:[Date],
-    secretTour:{
-        type:Boolean,
-        default:false
+    imageCover: {
+        type: String,
+        required: [true, 'Tour must have a cover image']
     },
-    startLocation:{
+    images: [String],
+    createdAt: {
+        type: Date,
+        default: Date.now,
+        select: false// not retreived when quering the data base
+    },
+    startDates: [Date],
+    secretTour: {
+        type: Boolean,
+        default: false
+    },
+    startLocation: {
         //GEOJSON
-        type:{
-            type:String,
-            default:'Point',
-            enum:['Point']
-        } ,
-        coordinates:[Number],
-        address:String,
-        description:String
+        type: {
+            type: String,
+            default: 'Point',
+            enum: ['Point']
+        },
+        coordinates: [Number],
+        address: String,
+        description: String
     },
-    locations:[
+    locations: [
         {
-            type:{
-                type:String,
-                default:'Point',
-                enum:['Point']
-            } ,
-            coordinates:[Number],
-            address:String,
-            description:String,
-            day:Number
+            type: {
+                type: String,
+                default: 'Point',
+                enum: ['Point']
+            },
+            coordinates: [Number],
+            address: String,
+            description: String,
+            day: Number
         }
     ],
-    guides:[{
-        type:mongoose.Schema.ObjectId,
-        ref:'User'
+    guides: [{
+        type: mongoose.Schema.ObjectId,
+        ref: 'User'
     }
     ]
 },
-{
-    toJSON:{virtuals:true},
-    toObject:{virtuals:true}// do not understand their purpose
-})
-tourSchema.virtual('durationWeeks').get(function(){
-    return this.duration/7
+    {
+        toJSON: { virtuals: true },
+        toObject: { virtuals: true }// do not understand their purpose
+    })
+tourSchema.virtual('durationWeeks').get(function () {
+    return this.duration / 7
 })
 
 // virtual populate
 
-tourSchema.virtual('reviews',{
-    ref:"Review",
-    foreignField:'tour',
-    localField:'_id'
+tourSchema.virtual('reviews', {
+    ref: "Review",
+    foreignField: 'tour',
+    localField: '_id'
 })
 
+
+// indexcies
+
+//tourSchema.index({ price: 1 }) // 1 for acsending -1 for descending
+
+tourSchema.index({ price: 1, ratingAverage: -1 })// if we make compound index we do not need to make individual index for the spicified fields
+tourSchema.index({ slug: 1 })
 
 // create document (documents)
 
@@ -144,8 +153,8 @@ testTour.save().then(doc=>{
 
 
 //Document middleware: runs before save and create but no insertmany
-tourSchema.pre('save',function(next){
-    this.slug = slugify(this.name,{lower:true})
+tourSchema.pre('save', function (next) {
+    this.slug = slugify(this.name, { lower: true })
     next()
 })
 
@@ -154,37 +163,33 @@ tourSchema.pre('save',function(next){
 // save and create and not update
 // middleware execute after and before a certain event
 
-tourSchema.post('save',function(doc){
-       // console.log(doc)
-})
-
 
 //
 
 // query middleware
 
-tourSchema.pre(/^find/,function(next){
+tourSchema.pre(/^find/, function (next) {
     this.populate({
-        path:'guides',
-        select:'-__v'
-      })
+        path: 'guides',
+        select: '-__v'
+    })
     next()
 })
 
-tourSchema.pre(/^find/,function(next){
-    this.find({secretTour:{$ne:true}})// to hidde all the secret tours
+tourSchema.pre(/^find/, function (next) {
+    this.find({ secretTour: { $ne: true } })// to hidde all the secret tours
     this.start = Date.now();
     next();
 })
-tourSchema.post(/^find/,function(docs){
-    console.log(`Query took ${Date.now() - this.start} milliseconds!` )//calculate the time taken by the query
+tourSchema.post(/^find/, function (docs) {
+    console.log(`Query took ${Date.now() - this.start} milliseconds!`)//calculate the time taken by the query
 })
 
 
 //aggregation middleware 
 
-tourSchema.pre('aggregate',function(next){
-    this.pipeline().unshift({$match:{secretTour:{$ne:true}}})
+tourSchema.pre('aggregate', function (next) {
+    this.pipeline().unshift({ $match: { secretTour: { $ne: true } } })
     //console.log(this.pipeline())
     next()// do not understand its purpose
 })
@@ -192,5 +197,5 @@ tourSchema.pre('aggregate',function(next){
 // create model(models)
 
 
-const Tour = mongoose.model('Tour',tourSchema)
+const Tour = mongoose.model('Tour', tourSchema)
 module.exports = Tour
