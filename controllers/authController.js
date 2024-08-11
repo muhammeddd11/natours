@@ -21,11 +21,11 @@ const createAndSendToken = (user, status, res) => {
     }
 
 
-    if (process.env.NODE_ENV === 'production') cookieOPtions.secure = true
+    if (process.env.NODE_ENV === 'production') cookieOPtions.secure = true// sending only over https protocol
 
     res.cookie('JWT', token, cookieOPtions)
 
-    user.password = undefined
+    user.password = undefined// to not been sending in the response
     res.status(status).json({
         status: "success",
         token,
@@ -45,7 +45,7 @@ exports.signUp = catchAsync(async (req, res, next) => {
         passwordConfirmation: req.body.passwordConfirmation,
         role: req.body.role
     })
-    createAndSendToken(newUser, 201, res)
+    createAndSendToken(newUser, 201, res)// send token to the user i.e. logging the user in
 })
 exports.login = catchAsync(async (req, res, next) => {
     const { email, password } = req.body
@@ -61,14 +61,14 @@ exports.login = catchAsync(async (req, res, next) => {
 })
 exports.protect = catchAsync(async (req, res, next) => {
     // 1) getting token and check if it's there
-    let token
+    let token // here becuase we can access the variable in the rest of the function not only in the if block
     if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
-        token = req.headers.authorization.split(" ")[1]
+        token = req.headers.authorization.split(" ")[1]//['bearer','ndiebcrbecpybimnz55']
     }
-    if (!token) return next(new AppError("You should logging in before you can see the tours", 401))
+    if (!token) return next(new AppError("You should logging in before visit this route", 401))
 
     // 2) verification the token
-    const decoded = await promisify(jwt.verify)(token, process.env.JWT_secret)
+    const decoded = await promisify(jwt.verify)(token, process.env.JWT_secret)//verfy function does not return a promise so we should use promisfy to make it promise so we can await it (function)(function's parameters)
     // 3) check if the user still exists
     const freshUser = await User.findById(decoded.id).select('+passwordChangedAt')
     if (!freshUser) return next(new AppError("the user belonging to this token is no longer exists..", 401))
@@ -79,7 +79,7 @@ exports.protect = catchAsync(async (req, res, next) => {
     req.user = freshUser
     next();
 })
-exports.restrictedTo = (...roles) => {
+exports.restrictedTo = (...roles) => {//(...roles) array of parameters
     return (req, res, next) => {
         if (!roles.includes(req.user.role)) {
             return (next(new AppError("you dont have permission to carry this action", 403)))
